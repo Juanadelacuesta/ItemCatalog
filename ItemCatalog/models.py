@@ -40,8 +40,8 @@ class Product(Base):
     
 class ProductPicture(Base, Image):
    
-    
-    product_id = Column(Integer, ForeignKey('Product.id'), primary_key=True)
+    id = Column(Integer, primary_key=True)
+    product_id = Column(Integer, ForeignKey('product.id'))
     product = relationship('Product')
     __tablename__ = 'product_picture'
     
