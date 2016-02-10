@@ -1,0 +1,31 @@
+<!--from flask import Flask, render_template, url_for-->
+
+<html>
+<head>
+
+
+</head>
+
+<body>
+
+<h1>New Product</h1>
+
+<h2>Enter information to register a new body section</h2>
+
+<form method="POST"  action= {{url_for('newBodySection')}}> 
+
+    {{ form.csrf_token }}
+    
+    {{ form.name.label }} {{ form.name(size=20) }}         <br/> 
+    <br/>
+    {{ form.description.label }} {{ form.description(size=40) }} <br/>
+     <br/>
+    {{ form.picture.label }} {{ form.picture(size=40) }}<br/>
+
+    <br/> 
+    </br><input type='submit' value='Save'> 
+</form>
+
+</body>
+
+</html> 

@@ -1,0 +1,28 @@
+<!--from flask import Flask, render_template, url_for-->
+
+<html>
+<head>
+
+
+</head>
+
+<body>
+
+<h1>Body Sections</h1>
+
+<h1>Edit the information of {{bodysection.name}}</h1>
+
+<form action="{{url_for('editBodySection', body_section_id=bodysection.id)}}"
+ method='POST'>
+    Name: <input type="text" name="name" value={{bodysection.name}}> <br/>
+    <br/>
+    Description: <input type="text" name="description" value={{bodysection.description}} /> <br/>
+    <br/>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <input type='submit' name='btn' value='Save'> 
+    <input type='submit' name='btn' value='Cancel'>     
+</form>   
+
+</body>
+
+</html> 

@@ -42,13 +42,12 @@ class Product(Base):
     
 class ProductPicture(Base, Image):
    
-    id = Column(Integer, primary_key=True)
-    product_id = Column(Integer, ForeignKey('product.id'))
+    product_id = Column(Integer, ForeignKey('product.id'), primary_key=True)
     product = relationship('Product', uselist=False)
     __tablename__ = 'product_picture'
     
 FileSystemStore('/itemcatalog/images','http://0.0.0.0:5000')
     
-engine = create_engine('sqlite:///makeup.db', echo=True)
+engine = create_engine('sqlite:///makeup.db')
 Base.metadata.create_all(engine)
 

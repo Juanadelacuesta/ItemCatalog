@@ -1,0 +1,29 @@
+<!--from flask import Flask, render_template, url_for-->
+
+<html>
+<head>
+
+
+</head>
+
+<body>
+
+<h1>Body Section</h1>
+
+<div>
+<p><strong>{{bodysection.name}}</strong></p>
+
+<p>Description: {{bodysection.description}}</p>
+
+<a href={{(url_for('editBodySection', body_section_id=bodysection.id))}}>Edit</a>
+<a href={{(url_for('deleteBodySection', body_section_id=bodysection.id))}}>Delete</a>
+
+</form>
+</br>
+
+</div>
+
+
+</body>
+
+</html> 
