@@ -4,10 +4,22 @@
 # Description: Views for the Items Catalog project
 #------------------------------------------------------------------------------#
 from flask import render_template, url_for, request, redirect, flash
+from urllib2 import urlopen
+from werkzeug import secure_filename
+from flask_wtf.file import FileField
+import os
+
 from ItemCatalog import app, session
+
 from models import BodySection, Product
+
 from forms import NewBodySectionForm, NewProductForm
 
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+    
 
 @app.route('/')
 @app.route('/section/')
@@ -78,30 +90,26 @@ def deleteBodySection(body_section_id):
         
 # Views for the Products
 
-@app.route('/product/', methods = ['GET','POST'])
+@app.route('/product/')
 def viewProducts():
     
     products = session.query(Product).order_by(Product.bodysection_id).all()    
-    if request.method == 'GET':
-        return render_template('products.html', products=products)
+    return render_template('products.html', products=products)
         
-    if request.method == 'POST':  
-        product_to_delete = (session.query(Product).
-                            filter(Product.id==request.form['id']).one())
-        session.delete(product_to_delete)
-        session.commit()
-        return redirect(url_for('viewProducts')) 
-
 @app.route('/product/new/', methods=['GET','POST'])
 def newProduct():
-
+ 
     form = NewProductForm(request.form)
+    product = Product()
     if request.method == 'GET':
-        return render_template('newProduct.html', form=form)
+        return render_template('newProduct.html')
         
-    if request.method == 'POST' and form.validate():
-        product = Product()
+    if request.method == 'POST' and form.validate():       
         form.populate_obj(product)
+        file = request.files['picture']
+        filename = secure_filename(file.filename)
+        if allowed_file(filename):
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         session.add(product)
         session.commit()
         return redirect(url_for('viewProducts'))

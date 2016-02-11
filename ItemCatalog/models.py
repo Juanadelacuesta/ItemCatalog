@@ -46,8 +46,8 @@ class ProductPicture(Base, Image):
     product = relationship('Product', uselist=False)
     __tablename__ = 'product_picture'
     
-FileSystemStore('/itemcatalog/images','http://0.0.0.0:5000')
+FileSystemStore('/itemcatalog/images','http://0.0.0.0:8000')
     
-engine = create_engine('sqlite:///makeup.db')
+engine = create_engine('sqlite:///makeup.db', echo=True)
 Base.metadata.create_all(engine)
 

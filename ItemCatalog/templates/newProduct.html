@@ -8,23 +8,24 @@
 
 <body>
 
-<h1>New Product</h1>
+    <h1>New Product</h1>
 
-<h2>Enter information to register a new body section</h2>
+    <h2>Enter information to register a new body section</h2>
 
-<form method="POST"  action= {{url_for('newBodySection')}}> 
+    <form method="POST"  enctype="multipart/form-data" 
+        action= {{url_for('newProduct')}} > 
+        
+        <p>Name: <input type="text" name="name" /> </p>
 
-    {{ form.csrf_token }}
+        <p>Description: <input type="text" name="description" /> <p/>
+
+        <p>Photo: <input type="file" name="picture" /> <p/> 
+        
+        <p>Section : <input type="text" name="bodysection_id" /> <p/>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <input type='submit' value='Save'> 
     
-    {{ form.name.label }} {{ form.name(size=20) }}         <br/> 
-    <br/>
-    {{ form.description.label }} {{ form.description(size=40) }} <br/>
-     <br/>
-    {{ form.picture.label }} {{ form.picture(size=40) }}<br/>
-
-    <br/> 
-    </br><input type='submit' value='Save'> 
-</form>
+    </form>
 
 </body>
 
