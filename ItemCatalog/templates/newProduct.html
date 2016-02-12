@@ -15,13 +15,13 @@
     <form method="POST"  enctype="multipart/form-data" 
         action= {{url_for('newProduct')}} > 
         
-        <p>Name: <input type="text" name="name" /> </p>
+        <p>Name: <input type="text" name="name" value=balh /> </p>
 
-        <p>Description: <input type="text" name="description" /> <p/>
+        <p>Description: <input type="text" name="description" value=blah /> <p/>
 
         <p>Photo: <input type="file" name="picture" /> <p/> 
         
-        <p>Section : <input type="text" name="bodysection_id" /> <p/>
+        <p>Section : <input type="text" name="bodysection_id" value=2> <p/>
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <input type='submit' value='Save'> 
     

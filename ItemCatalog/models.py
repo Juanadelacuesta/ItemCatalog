@@ -7,8 +7,6 @@
 from sqlalchemy import (Column, ForeignKey, Integer, String, Date, Enum, 
     Numeric,Table)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy_imageattach.entity import Image, image_attachment
-from sqlalchemy_imageattach.stores.fs import FileSystemStore
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 
@@ -32,22 +30,15 @@ class Product(Base):
     id = Column(Integer, primary_key = True)    
     name = Column(String(80), nullable = False)
     description = Column(String(150)) 
-    picture = image_attachment('ProductPicture')
+    picture_name = Column(String(30))
     bodysection_id = Column(Integer, ForeignKey('bodysection.id'))
     bodysection = relationship('BodySection')
     
     def __repr__(self):
-        return ("<Product [N:'%s' \n 'D:'%s' \n BS:'%s' ]>" % (self.name, 
-                self.description, self.bodysection))
+        return ("<Product [N:'%s' \n 'D:'%s' \n BS:'%s' PP: %s ]>" % (self.name, 
+                self.description, self.bodysection, self.picture_name))
     
-class ProductPicture(Base, Image):
-   
-    product_id = Column(Integer, ForeignKey('product.id'), primary_key=True)
-    product = relationship('Product', uselist=False)
-    __tablename__ = 'product_picture'
     
-FileSystemStore('/itemcatalog/images','http://0.0.0.0:8000')
-    
-engine = create_engine('sqlite:///makeup.db', echo=True)
+engine = create_engine('sqlite:///makeup.db')
 Base.metadata.create_all(engine)
 

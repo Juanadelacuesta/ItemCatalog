@@ -8,13 +8,14 @@ from urllib2 import urlopen
 from werkzeug import secure_filename
 from flask_wtf.file import FileField
 import os
-
+from sqlalchemy_imageattach.context import store_context
 from ItemCatalog import app, session
 
 from models import BodySection, Product
 
 from forms import NewBodySectionForm, NewProductForm
 
+IMAGES_FOLDER = "images/"
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -108,10 +109,15 @@ def newProduct():
         form.populate_obj(product)
         file = request.files['picture']
         filename = secure_filename(file.filename)
+        product.picture_name = IMAGES_FOLDER + filename
+        print "\n\n"
+        print product
+        print "\n\n"
         if allowed_file(filename):
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        session.add(product)
-        session.commit()
+            print "\n\n"+ product.picture_name +"\n\n\n"
+            file.save(app.config['UPLOAD_FOLDER'] + filename)
+            session.add(product)
+            session.commit()
         return redirect(url_for('viewProducts'))
 
 

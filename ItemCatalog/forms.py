@@ -16,5 +16,5 @@ class NewProductForm(Form):
     name = TextField('name', [validators.Length(min=4, max=25),
                                 validators.Required()])
     description = TextField('description', [validators.Required()])
-    picture = FileField('picture', [FileAllowed(['jpg'], 'jpg Images only')])
+    picture_url = FileField('picture', [FileAllowed(['jpg'], 'jpg Images only')])
     bodysection_id = IntegerField('bodysection_id', [validators.Required()])

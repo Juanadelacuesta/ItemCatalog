@@ -18,6 +18,8 @@
 <p><strong>{{p.name}}</strong></p>
 
 <p>Description: {{p.description}}</p>
+s,kufbairfguvjaefv: {{p.picture_name}}
+<img src="{{ url_for('static', filename=p.picture_name) }}" width="130" height="100"></img>
 
 <form method='POST' enctype='multipart/form-data' 
     action="{{url_for('viewProducts')}}">
@@ -25,6 +27,7 @@
 <input type='submit' value='Delete'>
 <input type= 'hidden' name="csrf_token" value="{{ csrf_token() }}"/>
 <input type='hidden' name='id' value={{p.id}}>
+
 
 </form>
 </br>
