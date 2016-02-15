@@ -8,7 +8,7 @@ from sqlalchemy import (Column, ForeignKey, Integer, String, Date, Enum,
     Numeric,Table)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy import create_engine
+
 
 Base = declarative_base()
 
@@ -18,10 +18,18 @@ class BodySection(Base):
     name = Column(String(80), nullable = False)
     description =  Column(String(80), nullable = False)
     id = Column(Integer, primary_key = True)
-
     
     def __repr__(self):
         return ("Body Part [N:%s \n D: %s]>" % (self.name, self.description))
+        
+    @property
+    def serialize(self):
+        #Return objetcs in an easily serializable format
+        return {
+            'name' : self.name,
+            'description' : self.description,
+            'id' : self.id
+        }
 
                
 class Product(Base):
@@ -37,8 +45,15 @@ class Product(Base):
     def __repr__(self):
         return ("<Product [N:'%s' \n 'D:'%s' \n BS:'%s' PP: %s ]>" % (self.name, 
                 self.description, self.bodysection, self.picture_name))
-    
-    
-engine = create_engine('sqlite:///makeup.db')
-Base.metadata.create_all(engine)
 
+    @property
+    def serialize(self):
+        #Return objetcs in an easily serializable format
+        return {
+            'name' : self.name,
+            'description' : self.description,
+            'id' : self.id,
+            'body_picture' : self.picture_name,
+            'bodysection_id' : self.bodysection_id 
+        }
+                

@@ -3,7 +3,7 @@
 # Author: Maria Clara De La Cuesta
 # Description: Views for the Items Catalog project
 #------------------------------------------------------------------------------#
-from flask import render_template, url_for, request, redirect, flash
+from flask import render_template, url_for, request, redirect, flash, jsonify
 from urllib2 import urlopen
 from werkzeug import secure_filename
 from flask_wtf.file import FileField
@@ -114,10 +114,73 @@ def newProduct():
         print product
         print "\n\n"
         if allowed_file(filename):
-            print "\n\n"+ product.picture_name +"\n\n\n"
             file.save(app.config['UPLOAD_FOLDER'] + filename)
             session.add(product)
             session.commit()
+        return redirect(url_for('viewProducts'))    
+
+@app.route('/product/<int:product_id>/')
+def product(product_id):
+    
+    product = (session.query(Product).
+        filter(Product.id==product_id).one()) 
+        
+    if request.method == 'GET': 
+        return render_template('product.html', product=product)
+
+@app.route('/product/<int:product_id>/edit/', methods=['GET','POST']) 
+def editProduct(product_id):
+    
+    form = NewProductForm(request.form)
+    product = (session.query(Product).
+                    filter(Product.id==product_id).one())
+                    
+    if request.method == 'GET':
+        return render_template('editProduct.html', product=product)
+
+    if request.method == 'POST' and form.validate():
+        print '/n/n/n/ post/n/n'
+        if request.form['btn'] == 'Save':
+            form.populate_obj(product)
+            
+            if request.files['picture']:
+                file = request.files['picture']
+
+                filename = secure_filename(file.filename)
+                product.picture_name = IMAGES_FOLDER + filename
+                file.save(app.config['UPLOAD_FOLDER'] + filename)
+            session.add(product)
+            session.commit()
+            return redirect(url_for('product', product_id=product_id)) 
+            
+        elif request.form['btn'] == 'Cancel':
+            return redirect(url_for('product', product_id=product_id))    
+            
+@app.route('/product/<int:product_id>/delete/', methods=['GET','POST']) 
+def deleteProduct(product_id):
+     
+    product = (session.query(Product).
+                    filter(Product.id==product_id).one())
+    form = NewProductForm(request.form)
+    if request.method == 'GET':
+        return render_template('deleteProduct.html', product=product)
+        
+    if request.method == 'POST':
+        if request.form['btn'] == 'Delete':
+            session.delete(product)
+            session.commit()
         return redirect(url_for('viewProducts'))
+        
+@app.route('/section/<int:section_id>/JSON/')
+def bodySectionJson(section_id):
+    section = session.query(BodySection).filter_by(id=section_id).one()
+    products = session.query(Product).filter_by(bodysection_id=section.id)
+    return jsonify(specific_products=[i.serialize for p in products])
+
+@app.route('/product/<int:product_id>/JSON/')
+def productJson(product_id):
+    product = session.query(Product).filter_by(id=product_id).one()
+    return jsonify(Product_info=product.serialize)
 
 
+       

@@ -1,0 +1,29 @@
+<!--from flask import Flask, render_template, url_for-->
+
+<html>
+<head>
+
+
+</head>
+
+<body>
+
+<h1>Are you sure you want to delete {{product.name}}?</h1>
+
+<form action="{{url_for('deleteProduct', product_id=product.id)}}"
+ method='POST'>
+    <p>Name: {{product.name}} <p/>
+
+    <p>Description: {{product.description}} <p/>
+
+     <p><img src="{{ url_for('static', filename=product.picture_name) }}" width="130" 
+    height="100"></img></p>
+    
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <input type='submit' name='btn' value='Delete'> 
+    <input type='submit' name='btn' value='Cancel'>     
+</form>   
+
+</body>
+
+</html> 

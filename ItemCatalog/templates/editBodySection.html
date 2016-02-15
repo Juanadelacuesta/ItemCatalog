@@ -12,15 +12,20 @@
 
 <h1>Edit the information of {{bodysection.name}}</h1>
 
-<form action="{{url_for('editBodySection', body_section_id=bodysection.id)}}"
- method='POST'>
-    Name: <input type="text" name="name" value={{bodysection.name}}> <br/>
-    <br/>
-    Description: <input type="text" name="description" value={{bodysection.description}} /> <br/>
-    <br/>
+<form method='POST'action="{{url_for('editBodySection', body_section_id=bodysection.id)}}"
+ enctype="multipart/form-data" >
+ 
+    <p>Name: <input type="text" name="name" value={{bodysection.name}}> </p>
+    
+    <p>Description: <input type="text" name="description" 
+        value={{bodysection.description}} /> </p>
+        
+    <p>Photo: <input type="file" name="picture" /> <p/>
+    <p>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <input type='submit' name='btn' value='Save'> 
-    <input type='submit' name='btn' value='Cancel'>     
+    <input type='submit' name='btn' value='Cancel'> 
+    </p>
 </form>   
 
 </body>
