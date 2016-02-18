@@ -1,32 +1,63 @@
 <!--from flask import Flask, render_template, url_for-->
 
 <html>
+<html lang="en">
+
 <head>
 
+<link rel="stylesheet" type="text/css" 
+    href="{{url_for('static', filename='style.css')}}">
+
+<link rel = "shortcut icon"
+    href={{url_for('static', filename="images/caja.jpg")}}>
+
+<link rel="stylesheet" 
+    href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+</head>
 
 </head>
 
 <body>
 
-    <h1>New Product</h1>
+<div class="header">
+    <h1>   My makeup site - Add a new product </h1>
+</div>
 
-    <h2>Enter information to register a new body section</h2>
+<div class ="product_content">
+    <p>Enter the following information to register a new product<p>
 
     <form method="POST"  enctype="multipart/form-data" 
+    {% if ps_section %}
+        action= {{url_for('newProduct', section_id = ps_section.id)}} > 
+    {% else %}
         action= {{url_for('newProduct')}} > 
+    {% endif %}
+        <p>Name: <input type="text" name="name" /> </p>
+    
+        <p>Description: <input type="text" name="description" /> </p>
         
-        <p>Name: <input type="text" name="name" value=balh /> </p>
+        {% if ps_section %}
+            <p>Section: <input type="text" disabled="disabled" 
+                value={{ps_section.name}}  /> </p>
+            <input type="hidden" name='bodysection_id' value={{ps_section.id}}>
+        {% else %}
 
-        <p>Description: <input type="text" name="description" value=blah /> <p/>
-
-        <p>Photo: <input type="file" name="picture" /> <p/> 
+            <p>Section :<select name='bodysection_id'></p> <br>   
+                {% for s in sections %}
+                    <option value={{s.id}}> {{s.name}}</option>
+                {% endfor %}
         
-        <p>Section : <input type="text" name="bodysection_id" value=2> <p/>
+                </select>
+        {% endif %}
+        <br>
+        <p>Photo: <input class="button" type="file" name="picture" /> </p> 
+         
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        <input type='submit' value='Save'> 
+        <input type='submit' class="button" value='Save'> 
+        
     
     </form>
-
+</div>
 </body>
 
 </html> 

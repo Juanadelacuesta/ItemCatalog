@@ -1,28 +1,39 @@
 <!--from flask import Flask, render_template, url_for-->
 
 <html>
+<html lang="en">
+
 <head>
 
+<link rel="stylesheet" type="text/css" 
+    href="{{url_for('static', filename='style.css')}}">
+
+<link rel = "shortcut icon"
+       href={{url_for('static', filename="images/caja.jpg")}}>
+</head>
 
 </head>
 
 <body>
 
-<h1>Body Sections</h1>
-kyfvkuy
-<h1>Are you sure you want to delete {{bodysection.name}}?</h1>
+<div class="header">
+    <h1>   My makeup site - Delete - {{bodysection.name}} </h1>
+</div>
 
-<form action="{{url_for('deleteBodySection', body_section_id=bodysection.id)}}"
- method='POST'>
-    Name: {{bodysection.name}} <br/>
-    <br/>
-    Description: {{bodysection.description}} <br/>
-    <br/>
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <input type='submit' name='btn' value='Delete'> 
-    <input type='submit' name='btn' value='Cancel'>     
-</form>   
+<div class="delete_content">
+    <h2>Are you sure you want to delete {{bodysection.name}}?</h2>
 
+    <form action="{{url_for('deleteBodySection', body_section_id=bodysection.id)}}"
+     method='POST'>
+        Name: {{bodysection.name}} <br/>
+        <br/>
+        Description: {{bodysection.description}} <br/>
+        <br/>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <input type='submit' name='btn' value='Delete' class="button"> 
+        <input type='submit' name='btn' value='Cancel' class="button">     
+    </form>   
+</div>
 </body>
 
 </html> 

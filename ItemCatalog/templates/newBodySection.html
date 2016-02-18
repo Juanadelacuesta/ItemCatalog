@@ -1,16 +1,29 @@
 <!--from flask import Flask, render_template, url_for-->
 
 <html>
+<html lang="en">
+
 <head>
+
+    <link rel="stylesheet" type="text/css" 
+    href="{{url_for('static', filename='style.css')}}">
+
+    <link rel = "shortcut icon"
+        href={{url_for('static', filename="images/caja.jpg")}}>
 
 
 </head>
 
 <body>
 
-<h1>New Body Sections</h1>
+<div class="header">
+    <h1>   My makeup site - Add a new product </h1>
+</div>
 
-<h2>Enter information to register a new body section</h2>
+
+<div class ="product_content">
+    <p>Enter the following information to register a section<p>
+
 
 <form method="POST"  action= {{url_for('newBodySection')}}> 
 
@@ -20,9 +33,11 @@
     <br/> 
 
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    </br><input type='submit' value='Save'> 
+    <a href={{url_for('index')}}> Cancel </a>
+    <input type='submit' value='Save' class="button"> 
 </form>
 
+</div>
 </body>
 
 </html> 

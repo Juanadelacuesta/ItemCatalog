@@ -1,14 +1,28 @@
 <!--from flask import Flask, render_template, url_for-->
 
 <html>
+<html lang="en">
+
 <head>
 
+<link rel="stylesheet" type="text/css" 
+    href="{{url_for('static', filename='style.css')}}">
 
+<link rel = "shortcut icon"
+    href={{url_for('static', filename="images/caja.jpg")}}>
+
+<link rel="stylesheet" 
+    href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
 </head>
 
 <body>
 
-<h1>Edit the information for {{product.name}}</h1>
+<div class="header">
+    <h1>   My makeup site - Edit the information for {{product.name}} </h1>
+</div>
+
+<div class ="product_content">
+<h2>Edit the necessary information</h2>
 
 <form action="{{url_for('editProduct', product_id=product.id)}}"
  method='POST'   enctype="multipart/form-data">
@@ -16,15 +30,21 @@
 
     <p>Description: <input type="text" name="description" 
         value={{product.description}} /> </p>
-        
-    <p>Photo: <input type="file" name="picture" /> <p/> 
+    
+    <p>Section :<select name='bodysection_id'></p> <br>   
+                {% for s in sections %}
+                    <option value={{s.id}}> {{s.name}}</option>
+                {% endfor %}
+                </select> </p>
+    
+    <p>Photo: <input type="file" class="button" name="picture" /> <p/> 
 
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <input type='submit' name='btn' value='Save'> 
-    <input type='submit' name='btn' value='Cancel'>     
+    <input type='submit' name='btn' value='Update' class="button"> 
+    <input type='submit' name='btn' value='Cancel' class="button">     
 </form>  
 
-
+</div>
 </body>
 
 </html> 

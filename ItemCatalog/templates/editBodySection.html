@@ -1,33 +1,42 @@
 <!--from flask import Flask, render_template, url_for-->
 
 <html>
+<html lang="en">
+
 <head>
 
+<link rel="stylesheet" type="text/css" 
+    href="{{url_for('static', filename='style.css')}}">
+
+<link rel = "shortcut icon"
+       href={{url_for('static', filename="images/caja.jpg")}}>
 
 </head>
 
 <body>
 
-<h1>Body Sections</h1>
+<div class="header">
+    <h1>   My makeup site - Edit {{bodysection.name}}  </h1>
+</div>
 
-<h1>Edit the information of {{bodysection.name}}</h1>
+<div class="section_content">
+    <h2>Edit the information of {{bodysection.name}}</h2>
 
-<form method='POST'action="{{url_for('editBodySection', body_section_id=bodysection.id)}}"
- enctype="multipart/form-data" >
- 
-    <p>Name: <input type="text" name="name" value={{bodysection.name}}> </p>
-    
-    <p>Description: <input type="text" name="description" 
-        value={{bodysection.description}} /> </p>
+    <form method='POST'action="{{url_for('editBodySection', body_section_id=bodysection.id)}}"
+     enctype="multipart/form-data" >
+     
+        <p>Name: <input type="text" name="name" value={{bodysection.name}}> </p>
         
-    <p>Photo: <input type="file" name="picture" /> <p/>
-    <p>
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-    <input type='submit' name='btn' value='Save'> 
-    <input type='submit' name='btn' value='Cancel'> 
-    </p>
-</form>   
-
+        <p>Description: <input type="text" name="description" 
+            value={{bodysection.description}} /> </p>
+            
+        <p>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <input type='submit' name='btn' value='Update' class="button"> 
+        <input type='submit' name='btn' value='Cancel' class="button"> 
+        </p>
+    </form>   
+</div>
 </body>
 
 </html> 
