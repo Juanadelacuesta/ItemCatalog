@@ -3,28 +3,40 @@
 # Author: Maria Clara De La Cuesta
 # Description: Views for the Items Catalog project
 #------------------------------------------------------------------------------#
+
 from flask import render_template, url_for, request, redirect, flash, jsonify
 from urllib2 import urlopen
 from werkzeug import secure_filename
 from flask_wtf.file import FileField
 import os
 from sqlalchemy_imageattach.context import store_context
+from flask import session as login_session
+from config import id_generator
 from ItemCatalog import app, session
-
 from models import BodySection, Product
-
 from forms import NewBodySectionForm, NewProductForm
 
-IMAGES_FOLDER = "images/"
-
+'''Function to check if the user is uploading an accepted image file
+    It recives the file name, extention included
+    It returns:
+    True if the file is valid
+    False if not
+'''
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
     
 
+@app.route('/login')
+def showLogin():
+        state = id_generator(32) 
+        login_session['state'] = state
+        return render_template('login.html', client_id = login_session['state'])
+    
 @app.route('/')
 @app.route('/section/')
 def index():
+    print  (app.config['IMAGES_FOLDER'])
     body_sections = session.query(BodySection).order_by(BodySection.name).all()    
     return render_template('index.html', bodysections=body_sections)
 
@@ -122,7 +134,7 @@ def newProduct(section_id=None):
         form.populate_obj(product)
         file = request.files['picture']
         filename = secure_filename(file.filename)
-        product.picture_name = IMAGES_FOLDER + filename
+        product.picture_name = app.config['IMAGES_FOLDER'] + filename
         if allowed_file(filename):
             file.save(app.config['UPLOAD_FOLDER'] + filename)
             session.add(product)

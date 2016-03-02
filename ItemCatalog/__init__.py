@@ -7,11 +7,14 @@
 #------------------------------------------------------------------------------#
 
 from sqlalchemy.orm import sessionmaker
-from models import Base
 from sqlalchemy import create_engine
 from flask import Flask
 from flask_wtf.csrf import CsrfProtect
+from flask import session as login_session
+import string
+import random
 from config import ProductionConfig, DevelopmentConfig
+from models import Base
 
    
 csrf = CsrfProtect()
@@ -21,6 +24,7 @@ csrf.init_app(app)
 
 app.config.from_object('ItemCatalog.DevelopmentConfig')
 #app.config.from_object('ItemCatalog.ProductionConfig')
+
 
 engine = create_engine(app.config['DATABASE_URI'])
 Base.metadata.create_all(engine)
