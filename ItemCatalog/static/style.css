@@ -55,11 +55,15 @@ h2 {
     background-color: #ffccff; 
     border: none;
     color: hotpink;
-    padding: 5px 5px;
+    padding: 10px 10px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 1em;
+    margin-top: auto;
+    margin-bottom: 100px;
+    margin-right: 150px;
+    margin-left: 80px;
 }
 
 p, dd, dt { color: #b82e8a;}
@@ -74,8 +78,6 @@ a:link, a:visited  {
     text-decoration: none;
 }
         
-
-
 .name {width:100%;display: inline-block; float: left;}
 .description {}
 .editdeletepane{}
