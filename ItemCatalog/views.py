@@ -138,7 +138,8 @@ def index():
 
     body_sections = session.query(BodySection).order_by(BodySection.name).all()    
     print login_session['picture']
-    return render_template('index.html', bodysections=body_sections, image=login_session['picture'])
+    return render_template('index.html', bodysections=body_sections, 
+        image=login_session['picture'])
 
     
 @app.route('/section/<int:section_id>/')
@@ -150,14 +151,16 @@ def section(section_id):
                     .all())  
     if request.method == 'GET': 
         return render_template('section.html', bodysection=body_section, 
-                                    products=products)
+                                    products=products,
+                                    image=login_session['picture'])
         
 @app.route('/section/new/', methods=['GET','POST'])
 def newBodySection():
 
     form = NewBodySectionForm(request.form)
     if request.method == 'GET':
-        return render_template('newBodySection.html')
+        return render_template('newBodySection.html',
+            image=login_session['picture'])
         
     if request.method == 'POST' and form.validate():
         body_section = BodySection()
@@ -173,7 +176,8 @@ def editBodySection(body_section_id):
     body_section = (session.query(BodySection).
                     filter(BodySection.id==body_section_id).one())
     if request.method == 'GET':
-        return render_template('editBodySection.html', bodysection=body_section)
+        return render_template('editBodySection.html', bodysection=body_section,
+                                image=login_session['picture'])
 
     if request.method == 'POST' and form.validate():
     
@@ -192,7 +196,9 @@ def deleteBodySection(body_section_id):
                     filter(BodySection.id==body_section_id).one())
     form = NewBodySectionForm(request.form)
     if request.method == 'GET':
-        return render_template('deleteBodySection.html', bodysection=body_section)
+        return render_template('deleteBodySection.html', 
+                                bodysection=body_section,
+                                image=login_session['picture'])
         
     if request.method == 'POST':
         if request.form['btn'] == 'Delete':
@@ -210,7 +216,8 @@ def deleteBodySection(body_section_id):
 def viewProducts():
     
     products = session.query(Product).order_by(Product.bodysection_id).all()    
-    return render_template('products.html', products=products)
+    return render_template('products.html', products=products,
+                            image=login_session['picture'])
  
 
 @app.route('/product/new/<int:section_id>', methods=['GET','POST'])
@@ -228,7 +235,8 @@ def newProduct(section_id=None):
     product = Product()
     if request.method == 'GET':
         return render_template('newProduct.html', sections=sections,
-                                ps_section=preselected_section)
+                                ps_section=preselected_section,
+                                image=login_session['picture'])
         
     if request.method == 'POST' and form.validate():       
         form.populate_obj(product)
@@ -252,7 +260,8 @@ def product(product_id):
         filter(Product.id==product_id).one()) 
         
     if request.method == 'GET': 
-        return render_template('product.html', product=product)
+        return render_template('product.html', product=product,
+                                image=login_session['picture'])
 
 @app.route('/product/<int:product_id>/edit/', methods=['GET','POST']) 
 def editProduct(product_id):
@@ -263,7 +272,8 @@ def editProduct(product_id):
     sections = session.query(BodySection).all()                
     if request.method == 'GET':
         return render_template('editProduct.html', 
-                                product=product, sections= sections)
+                                product=product, sections= sections,
+                                image=login_session['picture'])
 
     if request.method == 'POST' and form.validate():
         print '/n/n/n/ post/n/n'
@@ -288,7 +298,8 @@ def deleteProduct(product_id):
                     filter(Product.id==product_id).one())
     form = NewProductForm(request.form)
     if request.method == 'GET':
-        return render_template('deleteProduct.html', product=product)
+        return render_template('deleteProduct.html', product=product,
+                                image=login_session['picture'])
         
     if request.method == 'POST':
         if request.form['btn'] == 'Delete':
