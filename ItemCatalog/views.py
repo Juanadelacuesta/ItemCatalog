@@ -25,8 +25,9 @@ from models import BodySection, Product
 from forms import NewBodySectionForm, NewProductForm
 
 
-'''Function to check if the user is uploading an accepted image file
-    It recives the file name, extention included
+'''
+    Function to check if the user is uploading an accepted image file
+    It recieves the file name, extention included
     It returns:
     True if the file is valid
     False if not
@@ -35,6 +36,16 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
     
+'''
+    Function to create http response
+    It recieves, the text to show and the error code
+    It returns the response
+'''
+def create_http_response(response_text, response_code):
+        response = make_response(json.dumps(response_text), response_code)
+        response.headers['Content-Type']  = 'aplication/json'
+        return response
+       
 # Log in page
 @app.route('/login')
 def showLogin():
@@ -49,24 +60,19 @@ def showLogin():
 def gconnect():
 
     if request.args.get('state') != login_session['state']:
-        response = make_response(json.dumps('Invalid state parameter blah'), 401)
-        response.headers['Content-Type']  = 'aplication/json'
-        return response
+        return create_http_response('Invalid state parameter', 401)
     
     # Obtain authorization code
-
     code = request.data
+    
     try:
         oauth_flow = flow_from_clientsecrets('client_secret.json', scope='') 
         oauth_flow.redirect_uri='postmessage'
         credentials = oauth_flow.step2_exchange(code)
         
     except FlowExchangeError:
-        print "dentro de error"
-        response = make_response(json.dumps('Failed to upgrade the' + 
-        'authorization code blah'), 401)
-        response.headers['Content-Type']  = 'aplication/json'
-        return response
+        return create_http_response('Failed to upgrade the authorization code' +
+                                    'blah', 401)
     
     # Check that the access token is valid.
     access_token = credentials.access_token
@@ -77,33 +83,25 @@ def gconnect():
     
     #If the access token is invalid, abort
     if result.get('error') is not None:
-        response = make_response(json.dumps(result.get('error')), 500)
-        response.headers['Content-Type'] = 'application/json'
+        return create_http_response(result.get('error'), 500)
         
     # Verify that the access token is used for the intended user.
     gplus_id = credentials.id_token['sub']
     if result['user_id'] != gplus_id:
-        response = make_response(
-            json.dumps("Token's user Id doesnt match"), 401)
-        response.headers['Content-Type']  = 'aplication/json'
-        return response
+        return create_http_response("Token's user Id doesnt match", 401)
         
     # Verify that the access token is valid for this app.
     if result['issued_to'] != CLIENT_ID:
-        response = make_response(
-            json.dumps("Token's client ID does not match app's."), 401)
-        print "Token's client ID does not match app's blah."
-        response.headers['Content-Type'] = 'application/json'
-        return response
-    
+        print "Token's client ID does not match app's."
+        return create_http_response("Token's client ID does not match app's.", 
+                                    401)
+   
+    # Verify the user is not already connected
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
     
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = make_response(
-            json.dumps('Current user is already connected.'), 200)
-        response.headers['Content-Type'] = 'application/json'
-        return response
+        return create_http_response('Current user is already connected', 200)
         
     # Store the access token in the session for later use.
     login_session['access_token'] = credentials.access_token
@@ -116,11 +114,13 @@ def gconnect():
     answer = requests.get(userinfo_url, params=params)
 
     data = answer.json()
-   
+    
+    #Save user info
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
+    #Display welcome page
     output = ''
     output += '<h1>Welcome, '
     output += login_session['username']
@@ -130,7 +130,7 @@ def gconnect():
     output += ' " style = "width: 150px; height: 150px;border-radius: 75px;' 
     output += '-webkit-border-radius: 75px;-moz-border-radius: 75px;"> '
     flash("you are now logged in as %s" % login_session['username'])
-    print "done!"
+    
     return output
  
 # DISCONNECT - Revoke a current user's token and reset their login_session
@@ -138,47 +138,38 @@ def gconnect():
 def gdisconnect():
 
     #Get current session credentials
-    access_token = login_session['access_token']
-    print 'The user to be disconnected is: ' 
-    print login_session['username']
+    try:
+        access_token = login_session['access_token']
+        print 'The user to be disconnected is: ' 
+        print login_session['username']
     
     #If there is no current active user
-    if access_token is None:
- 	print 'Access Token is None'
-    	response = make_response(json.dumps('Current user not connected.'), 401)
-    	response.headers['Content-Type'] = 'application/json'
-    	return response
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+    except: 
+        print 'Access Token is None' 
+        return redirect(url_for('showLogin'))
+    
+    url = ('https://accounts.google.com/o/oauth2/revoke?token=%s' % 
+            login_session['access_token'])
     h = httplib2.Http()
-    print h
     result = h.request(url, 'GET')[0]
     
-    print 'result is '
-    print result
-    
     if result['status'] == '200':
-	del login_session['access_token'] 
-    	del login_session['gplus_id']
-    	del login_session['username']
-    	del login_session['email']
-    	del login_session['picture']
-    	response = make_response(json.dumps('Successfully disconnected.'), 200)
-    	response.headers['Content-Type'] = 'application/json'
-    	return response
+        del login_session['access_token'] 
+        del login_session['gplus_id']
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+    	return create_http_response('Successfully disconnected.', 200)
     else:
 	
-    	response = make_response(json.dumps('Failed to revoke token for given user.', 400))
-    	response.headers['Content-Type'] = 'application/json'
-    	return response
-
-
- 
+    	return create_http_response('Failed to revoke token for given user.', 
+                                    400)
+# Index page
 @app.route('/')
 @app.route('/section/')
 def index():
 
-    body_sections = session.query(BodySection).order_by(BodySection.name).all()    
-    print login_session['picture']
+    body_sections = session.query(BodySection).order_by(BodySection.name).all()        
     return render_template('index.html', bodysections=body_sections, 
         image=login_session['picture'])
 
@@ -186,15 +177,21 @@ def index():
 @app.route('/section/<int:section_id>/')
 def section(section_id):
     
-    body_section = (session.query(BodySection).
-        filter(BodySection.id==section_id).one()) 
-    products = (session.query(Product).filter(Product.bodysection_id==section_id)
+    try:
+        body_section = (session.query(BodySection).
+            filter(BodySection.id==section_id).one()) 
+    
+        products = (session.query(Product).filter(Product.bodysection_id==section_id)
                     .all())  
-    if request.method == 'GET': 
-        return render_template('section.html', bodysection=body_section, 
+        if request.method == 'GET': 
+            return render_template('section.html', bodysection=body_section, 
                                     products=products,
                                     image=login_session['picture'])
-        
+    
+    except:
+        flash("That particular section is not defined ")
+        return redirect(url_for('newBodySection'))
+    
 @app.route('/section/new/', methods=['GET','POST'])
 def newBodySection():
 
@@ -213,46 +210,55 @@ def newBodySection():
 @app.route('/section/<int:body_section_id>/edit/', methods=['GET','POST']) 
 def editBodySection(body_section_id):
     
-    form = NewBodySectionForm(request.form)
-    body_section = (session.query(BodySection).
-                    filter(BodySection.id==body_section_id).one())
-    if request.method == 'GET':
-        return render_template('editBodySection.html', bodysection=body_section,
-                                image=login_session['picture'])
+    try:
+        form = NewBodySectionForm(request.form)
+        body_section = (session.query(BodySection).
+                        filter(BodySection.id==body_section_id).one())
+        if request.method == 'GET':
+            return render_template('editBodySection.html', bodysection=body_section,
+                                    image=login_session['picture'])
 
-    if request.method == 'POST' and form.validate():
-    
-        if request.form['btn'] == 'Save':
-            form.populate_obj(body_section)
-            session.commit()
-            return redirect(url_for('index')) 
-            
-        elif request.form['btn'] == 'Cancel':
-            return redirect(url_for('section', section_id=body_section_id))        
+        if request.method == 'POST' and form.validate():
+        
+            if request.form['btn'] == 'Save':
+                form.populate_obj(body_section)
+                session.commit()
+                return redirect(url_for('index')) 
+                
+            elif request.form['btn'] == 'Cancel':
+                return redirect(url_for('section', section_id=body_section_id))        
 
+    except:
+        flash("That particular section is not defined ")
+        return redirect(url_for('newBodySection'))
+        
 @app.route('/section/<int:body_section_id>/delete/', methods=['GET','POST']) 
 def deleteBodySection(body_section_id):
      
-    body_section = (session.query(BodySection).
-                    filter(BodySection.id==body_section_id).one())
-    form = NewBodySectionForm(request.form)
-    if request.method == 'GET':
-        return render_template('deleteBodySection.html', 
-                                bodysection=body_section,
-                                image=login_session['picture'])
-        
-    if request.method == 'POST':
-        if request.form['btn'] == 'Delete':
-            session.delete(body_section)
-            session.commit()
-            return redirect(url_for('index'))
-        
-        elif request.form['btn'] == 'Cancel':
-            return redirect(url_for('section', section_id=body_section_id))
+    try:
+        body_section = (session.query(BodySection).
+                        filter(BodySection.id==body_section_id).one())
+        form = NewBodySectionForm(request.form)
+        if request.method == 'GET':
+            return render_template('deleteBodySection.html', 
+                                    bodysection=body_section,
+                                    image=login_session['picture'])
+            
+        if request.method == 'POST':
+            if request.form['btn'] == 'Delete':
+                session.delete(body_section)
+                session.commit()
+                return redirect(url_for('index'))
+            
+            elif request.form['btn'] == 'Cancel':
+                return redirect(url_for('section', section_id=body_section_id))
 
-        
+    except:
+        flash("That particular section is not defined ")
+        return redirect(url_for('newBodySection'))    
+
 # Views for the Products
-
+# Page to list all products ordered by section
 @app.route('/product/')
 def viewProducts():
     
@@ -297,56 +303,69 @@ def newProduct(section_id=None):
 @app.route('/product/<int:product_id>/')
 def product(product_id):
     
-    product = (session.query(Product).
-        filter(Product.id==product_id).one()) 
-        
-    if request.method == 'GET': 
-        return render_template('product.html', product=product,
-                                image=login_session['picture'])
+    try:
+        product = (session.query(Product).
+            filter(Product.id==product_id).one()) 
+            
+        if request.method == 'GET': 
+            return render_template('product.html', product=product,
+                                    image=login_session['picture'])
+    
+    except:
+        flash("That particular product is not defined ")
+        return redirect(url_for('newProduct'))    
 
 @app.route('/product/<int:product_id>/edit/', methods=['GET','POST']) 
 def editProduct(product_id):
     
-    form = NewProductForm(request.form)
-    product = (session.query(Product).
-                    filter(Product.id==product_id).one())
-    sections = session.query(BodySection).all()                
-    if request.method == 'GET':
-        return render_template('editProduct.html', 
-                                product=product, sections= sections,
-                                image=login_session['picture'])
+    try:
+        form = NewProductForm(request.form)
+        product = (session.query(Product).
+                        filter(Product.id==product_id).one())
+        sections = session.query(BodySection).all()                
+        if request.method == 'GET':
+            return render_template('editProduct.html', 
+                                    product=product, sections= sections,
+                                    image=login_session['picture'])
 
-    if request.method == 'POST' and form.validate():
-        print '/n/n/n/ post/n/n'
-        if request.form['btn'] == 'Save':
-            form.populate_obj(product)           
-            if request.files['picture']:
-                file = request.files['picture']
-                filename = secure_filename(file.filename)
-                product.picture_name = IMAGES_FOLDER + filename
-                file.save(app.config['UPLOAD_FOLDER'] + filename)
-                session.add(product)
-                session.commit()
-            return redirect(url_for('product', product_id=product_id)) 
-            
-        elif request.form['btn'] == 'Cancel':
-            return redirect(url_for('product', product_id=product_id))    
-            
+        if request.method == 'POST' and form.validate():
+            print '/n/n/n/ post/n/n'
+            if request.form['btn'] == 'Save':
+                form.populate_obj(product)           
+                if request.files['picture']:
+                    file = request.files['picture']
+                    filename = secure_filename(file.filename)
+                    product.picture_name = IMAGES_FOLDER + filename
+                    file.save(app.config['UPLOAD_FOLDER'] + filename)
+                    session.add(product)
+                    session.commit()
+                return redirect(url_for('product', product_id=product_id)) 
+                
+            elif request.form['btn'] == 'Cancel':
+                return redirect(url_for('product', product_id=product_id))       
+    except:
+        flash("That particular product is not defined ")
+        return redirect(url_for('newProduct'))    
+                
 @app.route('/product/<int:product_id>/delete/', methods=['GET','POST']) 
 def deleteProduct(product_id):
      
-    product = (session.query(Product).
-                    filter(Product.id==product_id).one())
-    form = NewProductForm(request.form)
-    if request.method == 'GET':
-        return render_template('deleteProduct.html', product=product,
-                                image=login_session['picture'])
-        
-    if request.method == 'POST':
-        if request.form['btn'] == 'Delete':
-            session.delete(product)
-            session.commit()
-        return redirect(url_for('viewProducts'))
+    try:
+        product = (session.query(Product).
+                        filter(Product.id==product_id).one())
+        form = NewProductForm(request.form)
+        if request.method == 'GET':
+            return render_template('deleteProduct.html', product=product,
+                                    image=login_session['picture'])
+            
+        if request.method == 'POST':
+            if request.form['btn'] == 'Delete':
+                session.delete(product)
+                session.commit()
+            return redirect(url_for('viewProducts'))
+    except:
+        flash("That particular product is not defined ")
+        return redirect(url_for('newProduct'))    
         
 @app.route('/section/<int:section_id>/JSON/')
 def bodySectionJson(section_id):
