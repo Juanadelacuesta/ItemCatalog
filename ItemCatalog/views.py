@@ -11,20 +11,19 @@ import os
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 
-
 from flask import render_template, url_for, request, redirect, flash, jsonify
 from flask import make_response
 from flask import session as login_session
+from flask_wtf.file import FileField
 from urllib2 import urlopen
 from werkzeug import secure_filename
-from flask_wtf.file import FileField
 from sqlalchemy_imageattach.context import store_context
-
 
 from config import id_generator
 from ItemCatalog import app, session, csrf, CLIENT_ID
 from models import BodySection, Product
 from forms import NewBodySectionForm, NewProductForm
+
 
 '''Function to check if the user is uploading an accepted image file
     It recives the file name, extention included
@@ -36,13 +35,15 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
     
-
+# Log in page
 @app.route('/login')
 def showLogin():
         state = id_generator(32) 
         login_session['state'] = state
         return render_template('login.html', STATE = state)
  
+ 
+# CONNECT - Identify de user using the google oauth API  
 @csrf.exempt
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
@@ -131,7 +132,47 @@ def gconnect():
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
+ 
+# DISCONNECT - Revoke a current user's token and reset their login_session
+@app.route('/gdisconnect')
+def gdisconnect():
+
+    #Get current session credentials
+    access_token = login_session['access_token']
+    print 'The user to be disconnected is: ' 
+    print login_session['username']
     
+    #If there is no current active user
+    if access_token is None:
+ 	print 'Access Token is None'
+    	response = make_response(json.dumps('Current user not connected.'), 401)
+    	response.headers['Content-Type'] = 'application/json'
+    	return response
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+    h = httplib2.Http()
+    print h
+    result = h.request(url, 'GET')[0]
+    
+    print 'result is '
+    print result
+    
+    if result['status'] == '200':
+	del login_session['access_token'] 
+    	del login_session['gplus_id']
+    	del login_session['username']
+    	del login_session['email']
+    	del login_session['picture']
+    	response = make_response(json.dumps('Successfully disconnected.'), 200)
+    	response.headers['Content-Type'] = 'application/json'
+    	return response
+    else:
+	
+    	response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+    	response.headers['Content-Type'] = 'application/json'
+    	return response
+
+
+ 
 @app.route('/')
 @app.route('/section/')
 def index():
