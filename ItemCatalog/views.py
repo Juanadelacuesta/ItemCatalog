@@ -42,7 +42,7 @@ def allowed_file(filename):
     It returns the response
 '''
 def create_http_response(response_text, response_code):
-        response = make_response(json.dumps(response_text), response_code)
+        response = make_response(json.dumps(response_text, response_code))
         response.headers['Content-Type']  = 'aplication/json'
         return response
        
@@ -138,46 +138,61 @@ def gconnect():
 def gdisconnect():
 
     #Get current session credentials
-    try:
-        access_token = login_session['access_token']
-        print 'The user to be disconnected is: ' 
-        print login_session['username']
+    access_token = login_session['access_token']
+    print 'The user to be disconnected is: ' 
+    print login_session['username']
     
     #If there is no current active user
-    except: 
-        print 'Access Token is None' 
-        return redirect(url_for('showLogin'))
-    
-    url = ('https://accounts.google.com/o/oauth2/revoke?token=%s' % 
-            login_session['access_token'])
+    if access_token is None:
+ 	print 'Access Token is None'
+    	response = make_response(json.dumps('Current user not connected.'), 401)
+    	response.headers['Content-Type'] = 'application/json'
+    	return response
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     
     if result['status'] == '200':
         del login_session['access_token'] 
-        del login_session['gplus_id']
-        del login_session['username']
-        del login_session['email']
-        del login_session['picture']
-    	return create_http_response('Successfully disconnected.', 200)
+    	del login_session['gplus_id']
+    	del login_session['username']
+    	del login_session['email']
+    	del login_session['picture']
+    	response = make_response(json.dumps('Successfully disconnected.'), 200)
+    	response.headers['Content-Type'] = 'application/json'
+        flash('Successfully disconnected')
+    	return redirect(url_for('showLogin'))
+   
     else:
-	
-    	return create_http_response('Failed to revoke token for given user.', 
-                                    400)
+    	response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+    	response.headers['Content-Type'] = 'application/json'
+    	return response
+    
 # Index page
 @app.route('/')
 @app.route('/section/')
 def index():
-
-    body_sections = session.query(BodySection).order_by(BodySection.name).all()        
-    return render_template('index.html', bodysections=body_sections, 
-        image=login_session['picture'])
-
     
+    if 'username'  in login_session:
+        picture = login_session['picture']
+    else:
+        picture = None
+        
+    body_sections = session.query(BodySection).order_by(BodySection.name).all()
+    
+    return render_template('index.html', bodysections=body_sections, 
+        image=picture)
+
+# Page of a specific body section  
 @app.route('/section/<int:section_id>/')
 def section(section_id):
-    
+     
     try:
+        if 'username'  in login_session:
+            picture = login_session['picture']
+        else:
+            picture = None
+            
         body_section = (session.query(BodySection).
             filter(BodySection.id==section_id).one()) 
     
@@ -191,10 +206,14 @@ def section(section_id):
     except:
         flash("That particular section is not defined ")
         return redirect(url_for('newBodySection'))
-    
+
+# Page to add a new body section          
 @app.route('/section/new/', methods=['GET','POST'])
 def newBodySection():
-
+    
+    if 'username' not in login_session:
+        return redirect(url_for('showLogin'))
+        
     form = NewBodySectionForm(request.form)
     if request.method == 'GET':
         return render_template('newBodySection.html',
@@ -206,21 +225,26 @@ def newBodySection():
         session.add(body_section)
         session.commit()
         return redirect(url_for('index'))
-        
+
+# Page to edit a specific body section         
 @app.route('/section/<int:body_section_id>/edit/', methods=['GET','POST']) 
 def editBodySection(body_section_id):
+    
+    if 'username' not in login_session:
+        return redirect(url_for('showLogin'))
     
     try:
         form = NewBodySectionForm(request.form)
         body_section = (session.query(BodySection).
                         filter(BodySection.id==body_section_id).one())
+                        
         if request.method == 'GET':
             return render_template('editBodySection.html', bodysection=body_section,
                                     image=login_session['picture'])
 
         if request.method == 'POST' and form.validate():
         
-            if request.form['btn'] == 'Save':
+            if request.form['btn'] == 'Update':
                 form.populate_obj(body_section)
                 session.commit()
                 return redirect(url_for('index')) 
@@ -231,10 +255,14 @@ def editBodySection(body_section_id):
     except:
         flash("That particular section is not defined ")
         return redirect(url_for('newBodySection'))
-        
+ 
+# Page to delete a body section 
 @app.route('/section/<int:body_section_id>/delete/', methods=['GET','POST']) 
 def deleteBodySection(body_section_id):
-     
+    
+    if 'username' not in login_session:
+        return redirect(url_for('showLogin'))
+    
     try:
         body_section = (session.query(BodySection).
                         filter(BodySection.id==body_section_id).one())
@@ -271,7 +299,14 @@ def viewProducts():
 @app.route('/product/new/', methods=['GET','POST'])
 def newProduct(section_id=None):
     
+    if 'username'  in login_session:
+        picture = login_session['picture']
+    else:
+        picture = None
+    
     sections = session.query(BodySection).all()
+    
+    # Check if the request comes from a particular section 
     if section_id:
         preselected_section = (session.query(BodySection).
                                     filter(BodySection.id==section_id).one())
@@ -300,8 +335,14 @@ def newProduct(section_id=None):
             
         return redirect(url_for('viewProducts'))    
 
+# Page to view the information on a specific product
 @app.route('/product/<int:product_id>/')
 def product(product_id):
+    
+    if 'username'  in login_session:
+        picture = login_session['picture']
+    else:
+        picture = None
     
     try:
         product = (session.query(Product).
@@ -315,9 +356,13 @@ def product(product_id):
         flash("That particular product is not defined ")
         return redirect(url_for('newProduct'))    
 
+# Page to edit a specific product
 @app.route('/product/<int:product_id>/edit/', methods=['GET','POST']) 
 def editProduct(product_id):
     
+    if 'username' not in login_session:
+        return redirect(url_for('showLogin'))
+        
     try:
         form = NewProductForm(request.form)
         product = (session.query(Product).
@@ -347,9 +392,14 @@ def editProduct(product_id):
         flash("That particular product is not defined ")
         return redirect(url_for('newProduct'))    
                 
+
+# Page to delete a specific product
 @app.route('/product/<int:product_id>/delete/', methods=['GET','POST']) 
 def deleteProduct(product_id):
-     
+    
+    if 'username' not in login_session:
+        return redirect(url_for('showLogin'))
+    
     try:
         product = (session.query(Product).
                         filter(Product.id==product_id).one())
@@ -366,14 +416,23 @@ def deleteProduct(product_id):
     except:
         flash("That particular product is not defined ")
         return redirect(url_for('newProduct'))    
-        
+ 
+# Get a body section information in json format 
 @app.route('/section/<int:section_id>/JSON/')
 def bodySectionJson(section_id):
-    section = session.query(BodySection).filter_by(id=section_id).one()
-    products = session.query(Product).filter_by(bodysection_id=section.id)
-    return jsonify(specific_products=[p.serialize for p in products])
-
+    try:
+        section = session.query(BodySection).filter_by(id=section_id).one()
+        products = session.query(Product).filter_by(bodysection_id=section.id)
+        return jsonify(specific_products=[p.serialize for p in products])
+    except: 
+        return (json.dumps(''))
+ 
+# Get a product information in json format  
 @app.route('/product/<int:product_id>/JSON/')
 def productJson(product_id):
-    product = session.query(Product).filter_by(id=product_id).one()
-    return jsonify(Product_info=product.serialize)
+    try:
+        product = session.query(Product).filter_by(id=product_id).one()
+        return jsonify(Product_info=product.serialize)
+    except:
+        return (json.dumps(''))
+        

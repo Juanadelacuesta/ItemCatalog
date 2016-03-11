@@ -69,7 +69,7 @@ h2 {
 p, dd, dt { color: #b82e8a;}
 
 a:link, a:visited  { 
-    color:hotpink; 
+    color: hotpink; 
     font-size: 1em;
     padding: 5px 5px;
     text-align: center; 
@@ -84,3 +84,8 @@ a:link, a:visited  {
 
 .flash          { background: #cee5F5; }
 
+.disconnect { 
+    color: white
+    text-align: left; 
+    font-size: 0.5em;
+}

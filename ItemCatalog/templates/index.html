@@ -17,8 +17,21 @@
 
 <div class="header">
     <h1>   My makeup site  Body Sections 
-   <img src={{image}} aligned style = "float: right; width: 30px; height: 30px;border-radius: 15px; 
-   -webkit-border-radius: 15px;-moz-border-radius: 15px;"> 
+
+    {%if image %}
+        <a style="color:white; font-size:0.5em; float:right; margin-right:15px; 
+            background: #ff66b3;" href={{(url_for('gdisconnect'))}}> 
+        Disconnect</a>
+        
+       <img src={{image}} style = "float: right; width: 30px; height: 30px;border-radius: 15px; 
+       -webkit-border-radius: 15px;-moz-border-radius: 15px;"> 
+   {%else%}
+        <a style="color:white; font-size:0.5em; float:right; margin-right:15px; 
+            background: #ff66b3;" href={{(url_for('showLogin'))}}>
+        Connect</a> 
+    
+   {%endif%}
+   
    </h1>
 </div>
 
@@ -30,7 +43,7 @@
 
 
     <p><a href={{(url_for('section', section_id=s.id))}}><strong>{{s.name}}</strong> </a>
-    Description: {{s.description}}</p>
+    {{s.description}}</p>
 
     {% endfor %}
 </div>

@@ -30,7 +30,6 @@ class BodySection(Base):
             'description' : self.description,
             'id' : self.id
         }
-
                
 class Product(Base):
 
