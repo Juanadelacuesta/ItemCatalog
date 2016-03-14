@@ -50,17 +50,26 @@ function signInCallback(authResult) {
         /* Send the one-time-use code to the server, if the server responds, 
         write a login successful message to the web page and then redirect
         back to the index page */
+
+        var csrftoken = $('meta[name=csrf-token]').attr('content')
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken)
+                }
+            }
+        })
+        
         $.ajax({ 
             type: 'POST',
             url: '/gconnect?state={{STATE}}',
-            processData: false,
-            contentType: 'application/octet-stream; charset=utf-8',
+            contentType:'application/octet-stream; charset=utf-8',
+            processData: false,        
             data: authResult['code'],
             success: function(result) {
                 
             // Handle or verify the server response if necessary.
                 if (result) {
-                    console.log("cosa rarita")
                     $('#result').html('Login Successful!</br>'+ result + 
                         '</br>Redirecting...')
                     setTimeout(function() {

@@ -121,17 +121,10 @@ def gconnect():
     login_session['email'] = data['email']
 
     #Display welcome page
-    output = ''
-    output += '<h1>Welcome, '
-    output += login_session['username']
-    output += '!</h1>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 150px; height: 150px;border-radius: 75px;' 
-    output += '-webkit-border-radius: 75px;-moz-border-radius: 75px;"> '
     flash("you are now logged in as %s" % login_session['username'])
-    
-    return output
+    return render_template('loginsucces.html', 
+                            username=login_session['username'], 
+                            picture=login_session['picture'])
  
 # DISCONNECT - Revoke a current user's token and reset their login_session
 @app.route('/gdisconnect')
