@@ -43,7 +43,7 @@ def allowed_file(filename):
 '''
 def create_http_response(response_text, response_code):
         response = make_response(json.dumps(response_text, response_code))
-        response.headers['Content-Type']  = 'aplication/json'
+        response.headers['Content-Type']  = 'application/json'
         return response
        
 # Log in page
