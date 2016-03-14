@@ -55,7 +55,7 @@ def showLogin():
  
  
 # CONNECT - Identify de user using the google oauth API  
-@csrf.exempt
+#@csrf.exempt
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
 

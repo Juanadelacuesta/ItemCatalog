@@ -14,10 +14,12 @@ Base = declarative_base()
 
 class BodySection(Base):
     __tablename__ = 'bodysection'
-    
+
     name = Column(String(80), nullable = False)
     description =  Column(String(80), nullable = False)
     id = Column(Integer, primary_key = True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship('User')
     
     def __repr__(self):
         return ("Body Part [N:%s \n D: %s]>" % (self.name, self.description))
@@ -40,6 +42,8 @@ class Product(Base):
     picture_name = Column(String(30))
     bodysection_id = Column(Integer, ForeignKey('bodysection.id'))
     bodysection = relationship('BodySection')
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship('User')
     
     def __repr__(self):
         return ("<Product [N:'%s' \n 'D:'%s' \n BS:'%s' PP: %s ]>" % (self.name, 
@@ -55,4 +59,14 @@ class Product(Base):
             'body_picture' : self.picture_name,
             'bodysection_id' : self.bodysection_id 
         }
-                
+ 
+class User(Base):
+
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key = True)
+    name = Column(String(80))
+    email = Column(String(80)) 
+    picture = Column(String(60))
+    
+
+    
