@@ -93,6 +93,10 @@ def showLogin():
  
  
 # CONNECT - Identify de user using the google oauth API  
+<<<<<<< HEAD
+=======
+@csrf.exempt
+>>>>>>> parent of 19e8403... Type: Func Add CSRF protection to the gconnect function, insert CSRF token in the ajaz request
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
 

@@ -11,9 +11,7 @@
     <link rel = "shortcut icon"
            href={{url_for('static', filename="images/caja.jpg")}}>
 
-    
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-           
+
     <!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
     </script>
@@ -52,10 +50,19 @@ function signInCallback(authResult) {
         /* Send the one-time-use code to the server, if the server responds, 
         write a login successful message to the web page and then redirect
         back to the index page */
-        
 
         var csrftoken = $('meta[name=csrf-token]').attr('content')
+<<<<<<< HEAD
        
+=======
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken)
+                }
+            }
+        })
+>>>>>>> parent of 19e8403... Type: Func Add CSRF protection to the gconnect function, insert CSRF token in the ajaz request
         
         $.ajax({ 
             type: 'POST',

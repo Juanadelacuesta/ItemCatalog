@@ -13,7 +13,7 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 class Config(object):
     DEBUG = False
     TESTING = True
-    DATABASE_URI = 'sqlite:///makeuptestwithuser.db'
+    DATABASE_URI = 'sqlite:///makeuptest.db'
     SECRET_KEY = "secret" 
     IMAGES = "images/"
     UPLOAD_FOLDER = "/vagrant/itemcatalog/itemcatalog/static/images/"
