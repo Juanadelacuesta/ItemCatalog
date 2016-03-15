@@ -34,6 +34,19 @@
 </div>
 
 <div class="content">
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+          
+        <ul>
+        {% for message in messages %}
+            <li> <strong> {{ message }} </strong> </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
+
+
 <h2><a href={{(url_for('newProduct'))}}>Add new Product</a>
 <a href={{(url_for('index'))}}>Search by body section</a></h2>
 

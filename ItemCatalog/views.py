@@ -15,7 +15,8 @@ from flask import render_template, url_for, request, redirect, flash, jsonify
 from flask import make_response
 from flask import session as login_session
 from flask_wtf.file import FileField
-from flask.ext.login import login_required
+from flask.ext.login import login_required, login_user, logout_user
+
 
 from urllib2 import urlopen
 from werkzeug import secure_filename
@@ -93,10 +94,6 @@ def showLogin():
  
  
 # CONNECT - Identify de user using the google oauth API  
-<<<<<<< HEAD
-=======
-@csrf.exempt
->>>>>>> parent of 19e8403... Type: Func Add CSRF protection to the gconnect function, insert CSRF token in the ajaz request
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
 
@@ -167,7 +164,9 @@ def gconnect():
     
     else:
         login_session['user_id'] = user_loader(login_session['email']).id
-
+    
+    login_user(user_loader(login_session['email']))
+    
     #Display welcome page
     flash("you are now logged in as %s" % login_session['username'])
     return render_template('loginsucces.html', 
@@ -202,7 +201,9 @@ def gdisconnect():
     	response = make_response(json.dumps('Successfully disconnected.'), 200)
     	response.headers['Content-Type'] = 'application/json'
         flash('Successfully disconnected')
-    	return redirect(url_for('showLogin'))
+    	logout_user()
+        return redirect(url_for('showLogin'))
+        
    
     else:
     	response = make_response(json.dumps('Failed to revoke token for given user.', 400))
@@ -210,11 +211,11 @@ def gdisconnect():
     	return response
     
 # Index page
-@login_required
+
 @app.route('/')
 @app.route('/section/')
 def index():
-    
+
     if 'username'  in login_session:
         picture = login_session['picture']
     else:
@@ -251,6 +252,7 @@ def section(section_id):
 
 # Page to add a new body section          
 @app.route('/section/new/', methods=['GET','POST'])
+@login_required
 def newBodySection():
     
     if 'username' not in login_session:
@@ -267,15 +269,15 @@ def newBodySection():
         body_section.user_id = login_session['user_id'] 
         session.add(body_section)
         session.commit()
+        flash("New section added! ")
         return redirect(url_for('index'))
 
 # Page to edit a specific body section         
-@app.route('/section/<int:body_section_id>/edit/', methods=['GET','POST']) 
+@app.route('/section/<int:body_section_id>/edit/', methods=['GET','POST'])
+@login_required 
 def editBodySection(body_section_id):
     
-    if 'username' not in login_session:
-        return redirect(url_for('showLogin'))
-    
+
     try:
         form = NewBodySectionForm(request.form)
         body_section = (session.query(BodySection).
@@ -373,6 +375,7 @@ def newProduct(section_id=None):
             file.save(app.config['UPLOAD_FOLDER'] + filename)
             session.add(product)
             session.commit()
+            flash("New product added! ")
         else:
             flash("Error while saving the photo file!")
         if section_id:

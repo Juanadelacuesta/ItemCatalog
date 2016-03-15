@@ -40,6 +40,17 @@
 <div class="content">
     <h2>{{bodysection.description}}</h2>
 
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+          
+        <ul>
+        {% for message in messages %}
+            <li> <strong> {{ message }} </strong> </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
+    
     <h2>Special products for {{bodysection.name}} </h2>
     <p>
         {%for p in products %}
