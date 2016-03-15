@@ -32,10 +32,10 @@ ItemCatalog/
  * config.py
  * ReadMe.md  
  * ItemCatalog/
-  * \__init\__.py
-  * models.py
-  * views.py
-  * templates/
+   * \__init\__.py
+   * models.py
+   * views.py
+   * templates/
    * static/
-   * style.css
-    * images/
+      * style.css
+      * images/
