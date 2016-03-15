@@ -15,8 +15,8 @@ It has two possible configurations, Development and Production, to chose, go
 to the __init__.py file and comment the setup you are not going to use.
 
 For the Google Authentication system to work you need to get user credentials 
-from the google console, you can find the information to do it in this [link].
-(https://developers.google.com/identity/protocols/OAuth2)
+from the google console, you can find the information to do it in this [link]
+(https://developers.google.com/identity/protocols/OAuth2).
 Once you get the client secret json file, save it in the same file as the 
 runserver.py file under the name client_secret.json 
 
@@ -28,17 +28,14 @@ To run it just execute the runserver.py file.
 The structure of the project is as follows:
 
 ItemCatalog/
-    runserver.py
-    config.py
-    ReadMe.md  
-    ItemCatalog/
-        __init__.py
-        models.py
-        views.py
-        templates/
-        static/
-            style.css
-            images/
-
-            
-            
+ -runserver.py
+ -config.py
+ -ReadMe.md  
+ -ItemCatalog/
+ --__init__.py
+ --models.py
+ --views.py
+ --templates/
+ ---static/
+ ---style.css
+ ----images/
