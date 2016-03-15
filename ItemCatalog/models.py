@@ -17,6 +17,8 @@ class BodySection(Base):
     name = Column(String(80), nullable = False)
     description =  Column(String(80), nullable = False)
     id = Column(Integer, primary_key = True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship('User')
     
     def __repr__(self):
         return ("Body Part [N:%s \n D: %s]>" % (self.name, self.description))
@@ -39,6 +41,8 @@ class Product(Base):
     picture_name = Column(String(30))
     bodysection_id = Column(Integer, ForeignKey('bodysection.id'))
     bodysection = relationship('BodySection')
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship('User')
     
     def __repr__(self):
         return ("<Product [N:'%s' \n 'D:'%s' \n BS:'%s' PP: %s ]>" % (self.name, 

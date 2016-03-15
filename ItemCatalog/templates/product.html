@@ -37,7 +37,16 @@
 </div>
 
 <div class ="product_content">
-
+ {% with messages = get_flashed_messages() %}
+      {% if messages %}
+          
+        <ul>
+        {% for message in messages %}
+            <li> <strong> {{ message }} </strong> </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
  <div data-role="main" class="ui-content">
     <div class="ui-grid-a">
       <div class="ui-block-a">
