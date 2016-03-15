@@ -28,14 +28,14 @@ To run it just execute the runserver.py file.
 The structure of the project is as follows:
 
 ItemCatalog/
- -runserver.py
- -config.py
- -ReadMe.md  
- -ItemCatalog/
- --__init__.py
- --models.py
- --views.py
- --templates/
- ---static/
- ---style.css
- ----images/
+ * runserver.py
+ * config.py
+ * ReadMe.md  
+ * ItemCatalog/
+  * \__init\__.py
+  * models.py
+  * views.py
+  * templates/
+   * static/
+   * style.css
+    * images/
