@@ -55,14 +55,7 @@ function signInCallback(authResult) {
         
 
         var csrftoken = $('meta[name=csrf-token]').attr('content')
-        
-        $.ajaxSetup({
-            beforeSend: function(xhr, settings) {
-                if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                    xhr.setRequestHeader("X-CSRFToken", csrftoken)
-                }
-            }
-        })
+       
         
         $.ajax({ 
             type: 'POST',
@@ -70,6 +63,7 @@ function signInCallback(authResult) {
             contentType:'application/octet-stream; charset=utf-8',
             processData: false,        
             data: authResult['code'],
+            headers: { 'X-CSRFToken': csrftoken},
             success: function(result) {
                 
             // Handle or verify the server response if necessary.

@@ -22,14 +22,14 @@ from flask import make_response
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 
-#from flask.ext.login import LoginManager
+from flask.ext.login import LoginManager
 
 from config import ProductionConfig, DevelopmentConfig
 from models import Base
 
 #Create objetcs to use CSRF protection and login managment with flask
 csrf = CsrfProtect()
-#login_manager = LoginManager()
+login_manager = LoginManager()
 
 app = Flask(__name__)
 csrf.init_app(app)

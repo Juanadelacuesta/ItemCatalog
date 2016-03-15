@@ -15,15 +15,53 @@ from flask import render_template, url_for, request, redirect, flash, jsonify
 from flask import make_response
 from flask import session as login_session
 from flask_wtf.file import FileField
+from flask.ext.login import login_required
+
 from urllib2 import urlopen
 from werkzeug import secure_filename
 from sqlalchemy_imageattach.context import store_context
+import psycopg2
 
 from config import id_generator
-from ItemCatalog import app, session, csrf, CLIENT_ID
-from models import BodySection, Product
+from ItemCatalog import app, session, csrf, CLIENT_ID, login_manager
+from models import BodySection, Product, User
 from forms import NewBodySectionForm, NewProductForm
 
+'''
+    Function to save a new user to the database
+    Receives a flask login_session object
+    Returns the newly saved user's id or None if it was not saved
+'''
+def createUser(login_session):
+
+    try:
+        user = User(login_session['username'], 
+                    login_session['email'], 
+                    login_session['picture'],
+                    True)
+                    
+        session.add(user)
+        session.commit()
+        user = session.query(User).filter_by(email=login_session['email']).one()
+        return user.id   
+    
+    except:
+        return None
+ 
+'''
+    Function to given *user_id*, return the associated User object.
+    Recieves: The user email
+    Returns: The user object retrived from the database or None if the
+        user doesn't exist.
+''' 
+@login_manager.user_loader
+def user_loader(user_email):
+    
+    try:
+        return session.query(User).filter(User.email==user_email).one()
+    
+    except:
+        return None
 
 '''
     Function to check if the user is uploading an accepted image file
@@ -55,7 +93,6 @@ def showLogin():
  
  
 # CONNECT - Identify de user using the google oauth API  
-#@csrf.exempt
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
 
@@ -115,10 +152,17 @@ def gconnect():
 
     data = answer.json()
     
-    #Save user info
+    #Save user info for the session
     login_session['username'] = data['name']
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
+    
+    #Check if the user existe in the database and save
+    if user_loader(login_session['email']) is None: 
+        login_session['user_id'] = createUser(login_session)
+    
+    else:
+        login_session['user_id'] = user_loader(login_session['email']).id
 
     #Display welcome page
     flash("you are now logged in as %s" % login_session['username'])
@@ -162,6 +206,7 @@ def gdisconnect():
     	return response
     
 # Index page
+@login_required
 @app.route('/')
 @app.route('/section/')
 def index():
@@ -215,6 +260,7 @@ def newBodySection():
     if request.method == 'POST' and form.validate():
         body_section = BodySection()
         form.populate_obj(body_section)
+        body_section.user_id = login_session['user_id'] 
         session.add(body_section)
         session.commit()
         return redirect(url_for('index'))
@@ -317,12 +363,14 @@ def newProduct(section_id=None):
         form.populate_obj(product)
         file = request.files['picture']
         filename = secure_filename(file.filename)
-        product.picture_name = app.config['IMAGES_FOLDER'] + filename
+        product.user_id = login_session['user_id']
+        product.picture_name = app.config['IMAGES_FOLDER'] + filename 
         if allowed_file(filename):
             file.save(app.config['UPLOAD_FOLDER'] + filename)
             session.add(product)
             session.commit()
-            
+        else:
+            flash("Error while saving the photo file!")
         if section_id:
             return redirect(url_for('section', section_id=section_id))
             

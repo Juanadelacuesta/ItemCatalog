@@ -4,11 +4,10 @@
 # Description: models for the item catalog project
 #------------------------------------------------------------------------------#
 
-from sqlalchemy import (Column, ForeignKey, Integer, String, Date, Enum, 
+from sqlalchemy import (Column, ForeignKey, Integer, String, Date, Boolean, 
     Numeric,Table)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-
 
 Base = declarative_base()
 
@@ -66,7 +65,32 @@ class User(Base):
     id = Column(Integer, primary_key = True)
     name = Column(String(80))
     email = Column(String(80)) 
-    picture = Column(String(60))
+    picture = Column(String)
+    authenticated = Column(Boolean)
     
+    def __init__(self, username, email, picture, authenticated):
+        self.name = username
+        self.email = email
+        self.picture = picture
+        self.authenticated = authenticated
+    
+    def is_active(self):
+        """True, as all users are active."""
+        return True
 
+    def get_id(self):
+        """Return the email address to satisfy Flask-Login's requirements."""
+        return self.email
+
+    def is_authenticated(self):
+        """Return True if the user is authenticated."""
+        return self.authenticated
+
+    def is_anonymous(self):
+        """False, as anonymous users aren't supported."""
+        return False
+    
+    def __repr__(self):
+        return ("<User [N:'%s' \n 'E:'%s' \n A:'%s']>" % (self.name, 
+            self.email, self.authenticated))
     
