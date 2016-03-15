@@ -37,9 +37,11 @@ app = Flask(__name__)
 csrf.init_app(app)
 login_manager.init_app(app)
 
+#Chose the configuration
 app.config.from_object('ItemCatalog.DevelopmentConfig')
 #app.config.from_object('ItemCatalog.ProductionConfig')
 
+#Load the client secret from Google
 CLIENT_ID = json.loads(
     open('client_secret.json', 'r').read())['web']['client_id']
 

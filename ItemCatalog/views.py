@@ -20,8 +20,8 @@ from flask.ext.login import login_required, login_user, logout_user
 
 from urllib2 import urlopen
 from werkzeug import secure_filename
-from sqlalchemy_imageattach.context import store_context
-import psycopg2
+#from sqlalchemy_imageattach.context import store_context
+#import psycopg2
 
 from config import id_generator
 from ItemCatalog import app, session, csrf, CLIENT_ID, login_manager
