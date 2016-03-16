@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://localhost:8000">
+    {% for page in pages %}
+    <url>
+        <loc>http://localhost:8000{{page[0]|safe}}</loc>
+        <priority>{{page[1]}}</priority>
+    </url>
+    {% endfor %}
+</urlset>

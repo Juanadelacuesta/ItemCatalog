@@ -7,6 +7,7 @@ import httplib2
 import json
 import requests
 import os
+from datetime import datetime, timedelta
 
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
@@ -355,10 +356,11 @@ def viewProducts():
                             image=picture)
  
 
+
 @app.route('/product/new/<int:section_id>', methods=['GET','POST'])
-@app.route('/product/new/', methods=['GET','POST'])
+@app.route('/product/new/', defaults={'section_id': None}, methods=['GET','POST'])
 @login_required
-def newProduct(section_id=None):
+def newProduct(section_id):
     
   
     sections = session.query(BodySection).all()
@@ -503,3 +505,52 @@ def productJson(product_id):
     except:
         return (json.dumps(''))
         
+@app.route("/sitemap.xml")
+def sitemap():
+
+    #Dictionary to store the pages information
+    pages=[]
+    
+    #Static pages
+    priority = 1 
+    for rule in app.url_map.iter_rules():
+
+        if "GET" in rule.methods and len(rule.arguments)==0:
+            pages.append([rule.rule, priority])
+            
+    #Body section generated pages
+    priority = 0
+    for section in session.query(BodySection).all():
+        url=url_for('editBodySection',body_section_id=section.id)
+        pages.append([url, priority])
+        
+        url=url_for('deleteBodySection',body_section_id=section.id)
+        created_time=section.created_time
+        pages.append([url, priority])
+        
+    #Product generated pages
+    for product in session.query(Product).all():
+        url=url_for('editProduct',product_id=product.id)
+        created_time=product.created_time
+        pages.append([url, priority])
+        
+        url=url_for('deleteProduct',product_id=product.id)
+        created_time=product.created_time
+        pages.append([url, priority])
+        
+        url=url_for('newProduct', product_id=product.id)
+        created_time=product.created_time
+        pages.append([url, priority])
+        
+    sitemap_xml = render_template('sitemap.xml', pages=pages)
+    response= make_response(sitemap_xml)
+    response.headers["Content-Type"] = "application/xml"     
+
+    return response
+    
+'''      # user model pages
+      users=User.query.order_by(User.modified_time).all()
+      for user in users:
+          url=url_for('user.pub',name=user.name)
+          modified_time=user.modified_time.date().isoformat()
+          pages.append([url,modified_time]) '''

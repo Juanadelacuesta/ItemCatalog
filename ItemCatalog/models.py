@@ -3,6 +3,7 @@
 # Author: Maria Clara De La Cuesta
 # Description: models for the item catalog project
 #------------------------------------------------------------------------------#
+from datetime import datetime
 
 from sqlalchemy import (Column, ForeignKey, Integer, String, Date, Boolean, 
     Numeric,Table)
@@ -19,7 +20,8 @@ class BodySection(Base):
     id = Column(Integer, primary_key = True)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship('User')
-    
+    created_time = Column(Date, default=datetime.now())
+
     def __repr__(self):
         return ("Body Part [N:%s \n D: %s]>" % (self.name, self.description))
         
@@ -43,6 +45,7 @@ class Product(Base):
     bodysection = relationship('BodySection')
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship('User')
+    created_time = Column(Date, default=datetime.now())
     
     def __repr__(self):
         return ("<Product [N:'%s' \n 'D:'%s' \n BS:'%s' PP: %s ]>" % (self.name, 
