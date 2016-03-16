@@ -285,26 +285,26 @@ def editBodySection(body_section_id):
         flash("That section is not defined, please define it to continue ")
         return redirect(url_for('newBodySection'))                    
         
-    if request.method == 'GET':
-        if body_section.user_id == login_session['user_id']:
-            return render_template('editBodySection.html',
-                                    bodysection=body_section,
-                                    image=login_session['picture'])
-        else:
-            flash("Only the creator of every section can edit it")
-            return redirect(url_for('index'))
-            
-    if request.method == 'POST' and form.validate():
-    
-        if request.form['btn'] == 'Update':
-            form.populate_obj(body_section)
-            session.commit()
-            return redirect(url_for('index')) 
-            
-        elif request.form['btn'] == 'Cancel':
-            return redirect(url_for('section', section_id=body_section_id))        
+    if body_section.user_id == login_session['user_id']:
+        if request.method == 'GET':
 
-   
+                return render_template('editBodySection.html',
+                                        bodysection=body_section,
+                                        image=login_session['picture'])
+                
+        if request.method == 'POST' and form.validate():
+        
+            if request.form['btn'] == 'Update':
+                form.populate_obj(body_section)
+                session.commit()
+                return redirect(url_for('index')) 
+                
+            elif request.form['btn'] == 'Cancel':
+                return redirect(url_for('section', section_id=body_section_id))        
+    else:
+        flash("Only the creator of every section can edit it")
+        return redirect(url_for('index'))
+
  
 # Page to delete a body section 
 @app.route('/section/<int:body_section_id>/delete/', methods=['GET','POST']) 
@@ -319,23 +319,24 @@ def deleteBodySection(body_section_id):
         return redirect(url_for('newBodySection'))  
     
     form = NewBodySectionForm(request.form)
-    if request.method == 'GET':
-        if body_section.user_id == login_session['user_id']:
+    
+    if body_section.user_id == login_session['user_id']:
+        if request.method == 'GET':
             return render_template('deleteBodySection.html', 
-                                    bodysection=body_section,
-                                    image=login_session['picture'])
-        else:
-            flash("Only the creator of every section can edit it")
-            return redirect(url_for('index'))
-        
-    if request.method == 'POST':
-        if request.form['btn'] == 'Delete':
-            session.delete(body_section)
-            session.commit()
-            return redirect(url_for('index'))
-        
-        elif request.form['btn'] == 'Cancel':
-            return redirect(url_for('section', section_id=body_section_id))
+                                        bodysection=body_section,
+                                        image=login_session['picture'])
+            
+        if request.method == 'POST':
+            if request.form['btn'] == 'Delete':
+                session.delete(body_section)
+                session.commit()
+                return redirect(url_for('index'))
+            
+            elif request.form['btn'] == 'Cancel':
+                return redirect(url_for('section', section_id=body_section_id))
+    else:
+        flash("Only the creator of every section can edit it")
+        return redirect(url_for('index'))
 
   
 
@@ -392,7 +393,7 @@ def newProduct(section_id=None):
         if section_id:
             return redirect(url_for('section', section_id=section_id))
             
-        return redirect(url_for('viewProducts'))    
+    return redirect(url_for('viewProducts'))    
 
 # Page to view the information on a specific product
 @app.route('/product/<int:product_id>/')
@@ -419,8 +420,7 @@ def product(product_id):
 @app.route('/product/<int:product_id>/edit/', methods=['GET','POST']) 
 @login_required
 def editProduct(product_id):
-    
-        
+           
     try:
         form = NewProductForm(request.form)
         product = (session.query(Product).
@@ -430,32 +430,31 @@ def editProduct(product_id):
         flash("That particular product is not registered ")
         return redirect(url_for('newProduct'))    
     
-    if request.method == 'GET':
-        if product.user_id == login_session['user_id']:
-            return render_template('editProduct.html', 
-                            product=product, sections= sections,
-                            image=login_session['picture'])
-        else:
-            flash("Only the creator of every product can edit it")
-            return redirect(url_for('product', product_id=product_id ))
-       
+    if product.user_id == login_session['user_id']:
+        if request.method == 'GET':
+                return render_template('editProduct.html', 
+                                product=product, sections= sections,
+                                image=login_session['picture'])
+           
+        if request.method == 'POST' and form.validate():
+            print '/n/n/n/ post/n/n'
+            if request.form['btn'] == 'Save':
+                form.populate_obj(product)           
+                if request.files['picture']:
+                    file = request.files['picture']
+                    filename = secure_filename(file.filename)
+                    product.picture_name = IMAGES_FOLDER + filename
+                    file.save(app.config['UPLOAD_FOLDER'] + filename)
+                    session.add(product)
+                    session.commit()
+                return redirect(url_for('product', product_id=product_id)) 
+                
+            elif request.form['btn'] == 'Cancel':
+                return redirect(url_for('product', product_id=product_id))       
+    else:
+        flash("Only the creator of every product can edit it")
+        return redirect(url_for('product', product_id=product_id ))
 
-    if request.method == 'POST' and form.validate():
-        print '/n/n/n/ post/n/n'
-        if request.form['btn'] == 'Save':
-            form.populate_obj(product)           
-            if request.files['picture']:
-                file = request.files['picture']
-                filename = secure_filename(file.filename)
-                product.picture_name = IMAGES_FOLDER + filename
-                file.save(app.config['UPLOAD_FOLDER'] + filename)
-                session.add(product)
-                session.commit()
-            return redirect(url_for('product', product_id=product_id)) 
-            
-        elif request.form['btn'] == 'Cancel':
-            return redirect(url_for('product', product_id=product_id))       
-    
                 
 
 # Page to delete a specific product
@@ -467,22 +466,23 @@ def deleteProduct(product_id):
         product = (session.query(Product).
                         filter(Product.id==product_id).one())
         form = NewProductForm(request.form)
+    except:
+        flash("That particular product is not registered ")
+        return redirect(url_for('newProduct')) 
+
+    if product.user_id == login_session['user_id']:
         if request.method == 'GET':
-            if product.user_id == login_session['user_id']:
-               return render_template('deleteProduct.html', product=product,
+            return render_template('deleteProduct.html', product=product,
                                         image=login_session['picture'])
-            else:
-                flash("Only the creator of every product can edit it")
-                return redirect(url_for('product', product_id=product_id ))
                 
         if request.method == 'POST':
             if request.form['btn'] == 'Delete':
                 session.delete(product)
                 session.commit()
             return redirect(url_for('viewProducts'))
-    except:
-        flash("That particular product is not registered ")
-        return redirect(url_for('newProduct'))    
+    else:
+        flash("Only the creator of every product can edit it")
+        return redirect(url_for('product', product_id=product_id ))
  
 # Get a body section information in json format 
 @app.route('/section/<int:section_id>/JSON/')
