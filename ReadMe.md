@@ -1,4 +1,4 @@
-#Item Catalog Web App
+# Item Catalog Web App
 
 Third project for the Udacity full Stack Nano Degree
 
@@ -23,7 +23,7 @@ runserver.py file under the name client_secret.json
 To run it just execute the runserver.py file.
 
  
-##Contents 
+## Contents 
 
 The structure of the project is as follows:
 
